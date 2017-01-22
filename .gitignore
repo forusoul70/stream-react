@@ -1,6 +1,6 @@
 node_modules
 server/resource/movie/*
-pubilc/bundle.js
+public/bundle.js
 build/*
 server/db/*
 error.log
