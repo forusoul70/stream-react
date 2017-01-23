@@ -1,4 +1,6 @@
-var mongodb = require('mongodb');
+import mongodb from 'mongodb';
+import mongoose from 'mongoose';
+
 const DB_URL = 'mongodb://localhost:27017/stream';
 const COLLECTION_TORRENT = 'torrent';
 
@@ -7,6 +9,7 @@ const COLLECTION_TORRENT = 'torrent';
 */
 var dbHelper = function() {
   this.isConnected = false;
+  this.model = null;
   this.requestConnect();
 };
 
@@ -16,15 +19,24 @@ var dbHelper = function() {
 dbHelper.prototype.requestConnect = function() {
   // connect
   var self = this;
-  mongodb.MongoClient.connect(DB_URL, function(err, database) {
-      if (err) {
-        console.error('Failed to connect database : ' + err);
-        return;
-      }
+  mongoose.connect(DB_URL);
+  let db = mongoose.connection;
+  db.on('error', console.error.bind(console, 'connnection error : '));
+  db.once('open', function() {
+    console.log('database has been connected');
 
-      console.log('Database connection ready');
-      self.isConnected = true;
-      self.db = database;
+    // Schema
+    let torrentSchema = mongoose.Schema({
+      id: String,
+      infoHash: String,
+      magnetURI: String,
+      downloaded: Boolean,
+      path : String,
+      downloadStatus : String
+    });
+
+    self.model = mongoose.model(COLLECTION_TORRENT, torrentSchema);
+    self.isConnected = true;
   });
 };
 
@@ -42,21 +54,16 @@ dbHelper.prototype.getTorrent = function(torrentId) {
       throw 'Invalid torrent id';
     }
 
-    // get collection
-    var collection = self.db.collection(COLLECTION_TORRENT);
-    collection.find({
-      id: torrentId
-    }).limit(1).next(function(err, torrent){
-      if (err) {
-        throw err;
-      }
+    var query = self.model.where({id : torrentId});
+    query.findOne(function(err, model) {
+      if (err) throw err;
 
-      if (torrent === undefined || torrent === null) {
-          console.log('Failed to find torernt by ' + torrentId);
-          failed();
-          return;
+      if (model === undefined || model === null) {
+        console.log('Failed to find torernt by ' + torrentId);
+        failed();
+        return;
       }
-      success(torrent);
+      success(model);
     });
   });
 }
@@ -86,38 +93,14 @@ dbHelper.prototype.updateTorrent= function(id, torrent) {
       ,downloadStatus : torrent.downloadStatus
     };
 
-    self.getTorrent(id).then(function(torrent){ // 이미 있다면
-      var torrentRow = {
-        id: id
-        ,infoHash: torrent.infoHash
-        ,magnetURI: torrent.magnetURI
-        ,downloaded: torrent.downloaded
-        ,path : torrent.path
-        ,downloadStatus : torrent.downloadStatus
-      };
-      self.db.collection(COLLECTION_TORRENT).update({id: id}, torrentRow, {}/*option*/,  function(e, result){
-        if (e) {
-          throw e;
-        }
-        if (result == false) {
-          throw 'Failed to insert';
-        }
-        // 성공
-        success();
-      });
-    }, function(){ // 없는 경우 새로 넣어야함.
-      self.db.collection(COLLECTION_TORRENT).insert(torrentRow, {}/*option*/, function(e, result) {
-        if (e) {
-          throw e;
-        }
-        if (result == false) {
-          throw 'Failed to insert';
-        }
-        // 성공
-        success();
-      });
-    }).catch(function(err) {      
-      throw err;
+    self.model.findOneAndUpdate({id : id}, torrentRow, {upsert : true}, function(err, doc){
+      if (err) throw err;
+
+      if (doc === undefined || doc === null) {
+        throw 'Failed to update';
+      }
+
+      success();
     });
   });
 };

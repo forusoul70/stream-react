@@ -13,9 +13,11 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.15.3",
+    "babel": "^6.5.2",
     "body-parser": "^1.16.0",
     "express": "^4.14.0",
     "mongodb": "^2.2.21",
+    "mongoose": "^4.7.7",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
     "webtorrent": "^0.98.3"
