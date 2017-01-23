@@ -15,12 +15,14 @@ setTimeout(function(){
   };
 
   // insert or update
-  dbHelper.updateTorrent(testTorrentId, torrent).
-  then(function(){
-    console.log('success');
-  }).catch(function(err) {
-    console.log('Failed  : ' + err);
-  });
+  for (var i = 0; i < 10; i++) {
+    dbHelper.updateTorrent(testTorrentId + '_' + i, torrent).
+    then(function(){
+      console.log('success');
+    }).catch(function(err) {
+      console.log('Failed  : ' + err);
+    });
+  }
 
   // update test
   torrent.downloadStatus = 'finished';
@@ -34,11 +36,19 @@ setTimeout(function(){
       } else {
         console.log('failed');
       }
-      console.dir(model);
+      console.dir('Download status is ' + model.downloadStatus);
     }
   }).catch(function(err) {
     console.log('Failed  : ' + err);
   });
 
+  // get all torrent list
+  dbHelper.getAllTorret().then(function(models){
+    models.forEach(function(model) {
+      console.log(model.magnetURI);
+    });
+  }).catch(function(err){
+    console.log('Failed ' + err);
+  });
 
 }, 2000);

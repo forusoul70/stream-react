@@ -21,7 +21,6 @@ dbHelper.prototype.requestConnect = function() {
   var self = this;
   mongoose.connect(DB_URL);
   let db = mongoose.connection;
-  db.on('error', console.error.bind(console, 'connnection error : '));
   db.once('open', function() {
     console.log('database has been connected');
 
@@ -64,6 +63,27 @@ dbHelper.prototype.getTorrent = function(torrentId) {
         return;
       }
       success(model);
+    });
+  });
+}
+
+dbHelper.prototype.getAllTorret = function() {
+  var self = this;
+  return new Promise(function(success, failed) {
+    if (self.isConnected == false) {
+      throw 'Database is not connected';
+    }
+
+    var list = self.model.find({}, function(err, models) {
+      if (err) throw err;
+
+      if (models === undefined || models === null) {
+        console.log('Failed to get torrent list');
+        failed();
+        return;
+      }
+
+      success(models);
     });
   });
 }
