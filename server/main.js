@@ -2,7 +2,7 @@ import express from 'express';
 import WebpackDevServer from 'webpack-dev-server';
 import webpack from 'webpack';
 import path from 'path';
-import bodyParser from 'body-Parser';
+import bodyParser from 'body-parser';
 
 global.appRoot = path.resolve(__dirname) + "/../server";
 global.modulePath = global.appRoot + "/module"
@@ -53,6 +53,10 @@ app.post('/torrent/requestDownload', (req, res) => {
   }
 
   res.status(200).send('finished');
+});
+
+app.post('/torrent/getTorrentList', (req, res) => {
+
 });
 
 const server = app.listen(port, () => {
