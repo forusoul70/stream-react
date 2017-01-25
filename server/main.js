@@ -3,6 +3,7 @@ import WebpackDevServer from 'webpack-dev-server';
 import webpack from 'webpack';
 import path from 'path';
 import bodyParser from 'body-parser';
+import dbHelper from './module/dbHelper';
 
 global.appRoot = path.resolve(__dirname) + "/../server";
 global.modulePath = global.appRoot + "/module"
@@ -56,7 +57,13 @@ app.post('/torrent/requestDownload', (req, res) => {
 });
 
 app.post('/torrent/getTorrentList', (req, res) => {
-
+  dbHelper.getAllTorret().then(function(list) {
+    console.log('Success : ' + list);
+    res.status(200).json(list);
+  }).catch(function(err){
+    console.log('Error : ' + err);
+    res.status(400).send(err);
+  })
 });
 
 const server = app.listen(port, () => {

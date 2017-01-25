@@ -2,7 +2,7 @@ var path = require('path');
 
 // find db helper
 var appRoot = path.resolve(__dirname);
-var dbHelper = new (require(appRoot + '/../module/dbHelper.js')).dbHelper();
+var dbHelper = require(appRoot + '/../module/dbHelper.js');
 
 setTimeout(function(){
   let testTorrentId = 'test torrent id';
@@ -13,6 +13,8 @@ setTimeout(function(){
     path : 'path test',
     downloadStatus : 'downloading'
   };
+
+  console.dir(dbHelper);
 
   // insert or update
   for (var i = 0; i < 10; i++) {

@@ -27,7 +27,7 @@ var getModulePath = function() {
 
 var path = require('path');
 var WebTorrent = require('webtorrent');
-var dbHelper = new (require(getModulePath() + '/dbHelper.js')).dbHelper();
+import dbHelper from './dbHelper';
 
 /**
 *  Human readable bytes util

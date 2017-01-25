@@ -19,8 +19,8 @@ var dbHelper = function() {
 dbHelper.prototype.requestConnect = function() {
   // connect
   var self = this;
-  mongoose.connect(DB_URL);
-  let db = mongoose.connection;
+  // mongoose.connect(DB_URL);
+  let db = mongoose.createConnection(DB_URL);
   db.once('open', function() {
     console.log('database has been connected');
 
@@ -34,8 +34,12 @@ dbHelper.prototype.requestConnect = function() {
       downloadStatus : String
     });
 
-    self.model = mongoose.model(COLLECTION_TORRENT, torrentSchema);
-    self.isConnected = true;
+    try {
+      self.model = mongoose.model(COLLECTION_TORRENT, torrentSchema);
+      self.isConnected = true;
+    } catch (err) {
+      console.log('Failed : ' + err);
+    }
   });
 };
 
@@ -125,4 +129,13 @@ dbHelper.prototype.updateTorrent= function(id, torrent) {
   });
 };
 
-module.exports.dbHelper = dbHelper;
+// Singleton
+dbHelper.instance = null;
+dbHelper.getInstance = function() {
+  if (this.instance === null) {
+    this.instance = new dbHelper()
+  }
+  return this.instance;
+};
+
+module.exports = dbHelper.getInstance();
