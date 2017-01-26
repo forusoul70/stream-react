@@ -1,8 +1,8 @@
-var path = require('path');
+import path from 'path';
+import mongoDbManager from '../module/mongoDbManager';
 
 // find db helper
-var appRoot = path.resolve(__dirname);
-var dbHelper = require(appRoot + '/../module/dbHelper.js');
+var appRoot = path.resolve(__dirname);;
 
 setTimeout(function(){
   let testTorrentId = 'test torrent id';
@@ -14,11 +14,10 @@ setTimeout(function(){
     downloadStatus : 'downloading'
   };
 
-  console.dir(dbHelper);
-
+  console.log('Insert or update test');
   // insert or update
   for (var i = 0; i < 10; i++) {
-    dbHelper.updateTorrent(testTorrentId + '_' + i, torrent).
+    mongoDbManager.updateTorrent(testTorrentId + '_' + i, torrent).
     then(function(){
       console.log('success');
     }).catch(function(err) {
@@ -28,9 +27,9 @@ setTimeout(function(){
 
   // update test
   torrent.downloadStatus = 'finished';
-  dbHelper.updateTorrent(testTorrentId, torrent).
+  mongoDbManager.updateTorrent(testTorrentId, torrent).
   then(function(){
-    return dbHelper.getTorrent(testTorrentId);
+    return mongoDbManager.getTorrent(testTorrentId);
   }).then(function(model) {
     if (model) {
       if (model.downloadStatus === 'finished') {
@@ -45,9 +44,9 @@ setTimeout(function(){
   });
 
   // get all torrent list
-  dbHelper.getAllTorret().then(function(models){
+  mongoDbManager.getAllTorret().then(function(models){
     models.forEach(function(model) {
-      console.log(model.magnetURI);
+      console.dir(model);
     });
   }).catch(function(err){
     console.log('Failed ' + err);

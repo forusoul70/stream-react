@@ -1,16 +1,20 @@
-var path = require('path');
+import torrentManager from '../module/torrentManager';
+import path from 'path';
 
 // find torrent helper
 var appRoot = path.resolve(__dirname);
-var torrentHelper = new (require(appRoot + '/../module/torrentHelper.js')).torrentHelper();
 
 var torrentId = 'https://webtorrent.io/torrents/sintel.torrent'
-torrentHelper.requestDownload(torrentId);
+torrentManager.requestDownload(torrentId);
 
 setInterval(function(){
-  var status = torrentHelper.getStats(torrentId);
-  if (status !== undefined) {
-    console.log('Downloaded : ' + status.percent);
-    console.log('Speed : ' + status.downloadSpeed);
+  try {
+    var status = torrentManager.getStatus(torrentId);
+    if (status !== undefined) {
+      console.log('Downloaded : ' + status.percent);
+      console.log('Speed : ' + status.downloadSpeed);
+    }
+  } catch(err) {
+    console.log('error ' + err);
   }
 }, 1000);

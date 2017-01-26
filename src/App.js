@@ -1,6 +1,5 @@
 import React from 'react';
 import DownloadDetail from './DownloadDetail'
-import TorrentList from './TorrentList'
 
 export default class App extends React.Component {
   constructor(props) {
@@ -11,7 +10,6 @@ export default class App extends React.Component {
     return (
       <div>
         <DownloadDetail/>
-        <TorrentList/>
       </div>
     )
   }

@@ -7,7 +7,7 @@ const COLLECTION_TORRENT = 'torrent';
 /**
 * Mongo db 접근을 위한 모듈
 */
-var dbHelper = function() {
+var mongoDbManager = function() {
   this.isConnected = false;
   this.model = null;
   this.requestConnect();
@@ -16,11 +16,16 @@ var dbHelper = function() {
 /**
 * 연결 요청.
 */
-dbHelper.prototype.requestConnect = function() {
+mongoDbManager.prototype.requestConnect = function() {
   // connect
   var self = this;
-  // mongoose.connect(DB_URL);
-  let db = mongoose.createConnection(DB_URL);
+  let db = mongoose.connect(DB_URL);
+  db = mongoose.connection;
+
+  db.on('error', function(err) {
+    console.log('error  : ' + err);
+  });
+
   db.once('open', function() {
     console.log('database has been connected');
 
@@ -36,6 +41,9 @@ dbHelper.prototype.requestConnect = function() {
 
     try {
       self.model = mongoose.model(COLLECTION_TORRENT, torrentSchema);
+      self.model.on('error', function(err) {
+        console.log('error  : ' + err);
+      });
       self.isConnected = true;
     } catch (err) {
       console.log('Failed : ' + err);
@@ -46,7 +54,7 @@ dbHelper.prototype.requestConnect = function() {
 /**
 * Torrent 정보를 가져옴.
 */
-dbHelper.prototype.getTorrent = function(torrentId) {
+mongoDbManager.prototype.getTorrent = function(torrentId) {
   var self = this;
   return new Promise(function(success, failed) {
     if (self.isConnected == false) {
@@ -71,7 +79,7 @@ dbHelper.prototype.getTorrent = function(torrentId) {
   });
 }
 
-dbHelper.prototype.getAllTorret = function() {
+mongoDbManager.prototype.getAllTorret = function() {
   var self = this;
   return new Promise(function(success, failed) {
     if (self.isConnected == false) {
@@ -87,7 +95,15 @@ dbHelper.prototype.getAllTorret = function() {
         return;
       }
 
-      success(models);
+      success(models.map(function(model) {
+        return {
+          infoHash: model.infoHash,
+          magnetURI: model.magnetURI,
+          downloaded: model.downloaded,
+          path : model.path,
+          downloadStatus : model.downloadStatus
+        }
+      }));
     });
   });
 }
@@ -95,7 +111,7 @@ dbHelper.prototype.getAllTorret = function() {
 /**
 * Torrent 를 업데이트 함.
 */
-dbHelper.prototype.updateTorrent= function(id, torrent) {
+mongoDbManager.prototype.updateTorrent= function(id, torrent) {
   var self = this;
   return new Promise(function(success) {
     if (self.isConnected == false) {
@@ -130,12 +146,12 @@ dbHelper.prototype.updateTorrent= function(id, torrent) {
 };
 
 // Singleton
-dbHelper.instance = null;
-dbHelper.getInstance = function() {
+mongoDbManager.instance = null;
+mongoDbManager.getInstance = function() {
   if (this.instance === null) {
-    this.instance = new dbHelper()
+    this.instance = new mongoDbManager()
   }
   return this.instance;
 };
 
-module.exports = dbHelper.getInstance();
+module.exports = mongoDbManager.getInstance();

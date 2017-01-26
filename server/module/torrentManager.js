@@ -1,3 +1,7 @@
+import path from 'path';
+import WebTorrent from 'webtorrent';
+import mongoDbManager from './mongoDbManager';
+
 const STATUS_DOWNLOADING = 'downloading';
 const STATUS_DONE = 'done';
 
@@ -25,10 +29,6 @@ var getModulePath = function() {
   return rootPath + '/module';
 };
 
-var path = require('path');
-var WebTorrent = require('webtorrent');
-import dbHelper from './dbHelper';
-
 /**
 *  Human readable bytes util
 */
@@ -45,14 +45,14 @@ var prettyBytes = function(num) {
 /**
 * Web Torrent module
 */
-var torrentHelper = function() {
+var torrentManager = function() {
   this.downloadMap = {};
 };
 
 /**
 * torrent 다운로드 요청.
 */
-torrentHelper.prototype.requestDownload = function (torrentId, downloadPath) {
+torrentManager.prototype.requestDownload = function (torrentId, downloadPath) {
   // validation check
   if (typeof torrentId !== 'string' || torrentId.length == 0) {
     console.log('Invalid torrent id');
@@ -74,7 +74,7 @@ torrentHelper.prototype.requestDownload = function (torrentId, downloadPath) {
 
     // update torrent status to db
     torrent.downloadStatus = STATUS_DOWNLOADING;
-    dbHelper.updateTorrent(torrentId, torrent).then(function(){
+    mongoDbManager.updateTorrent(torrentId, torrent).then(function(){
       console.log('update db finished');
     }).catch(function(err) {
       console.log('Failed to update db! : ' +  err);
@@ -85,11 +85,24 @@ torrentHelper.prototype.requestDownload = function (torrentId, downloadPath) {
       console.log('Error occurred : ', err);
     });
 
+    torrent.on('download', function(bytes) {
+        var status = self.getStatus(torrentId);
+        if (status !== undefined) {
+          torrent.downloadStatus = JSON.stringify(status);
+          mongoDbManager.updateTorrent(torrentId, torrent).then(function(){            
+            console.dir(status);
+          }).catch(function(err) {
+            console.log('Failed to update status : ' + err);
+          });
+
+        }
+    });
+
     // Handle Download finish
     torrent.on('done', function(err) {
       // update torrent status to db
       torrent.downloadStatus = STATUS_DONE;
-      dbHelper.updateTorrent(torrentId, torrent).then(function(){
+      mongoDbManager.updateTorrent(torrentId, torrent).then(function(){
         console.log('update db finished');
       }).catch(function(err) {
         console.log('Failed to update db : ' + err);
@@ -99,6 +112,8 @@ torrentHelper.prototype.requestDownload = function (torrentId, downloadPath) {
       torrent.files.forEach(function(file){
         console.log('%s[%d][%b]', file.name, file.length, file.downloaded);
       });
+
+      this.downloadMap[torrentId] = null;
     });
   });
 };
@@ -106,7 +121,7 @@ torrentHelper.prototype.requestDownload = function (torrentId, downloadPath) {
 /**
 * 다운로드 중인 torrent 의 status 를 가져온다.
 */
-torrentHelper.prototype.getStats = function (torrentId) {
+torrentManager.prototype.getStatus = function (torrentId) {
   if (this.downloadMap.hasOwnProperty(torrentId) == false) {
     console.log('getStats(), Failed to find torrent : ' + torrentId);
     return undefined;
@@ -121,4 +136,13 @@ torrentHelper.prototype.getStats = function (torrentId) {
   };
 };
 
-module.exports.torrentHelper = torrentHelper;
+// Singleton
+torrentManager.instance = null;
+torrentManager.getInstance = function() {
+  if (this.instance === null) {
+    this.instance = new torrentManager()
+  }
+  return this.instance;
+};
+
+module.exports = torrentManager.getInstance();

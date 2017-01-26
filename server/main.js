@@ -3,7 +3,8 @@ import WebpackDevServer from 'webpack-dev-server';
 import webpack from 'webpack';
 import path from 'path';
 import bodyParser from 'body-parser';
-import dbHelper from './module/dbHelper';
+import mongoDbManager from './module/mongoDbManager';
+import torrentManager from './module/torrentManager'
 
 global.appRoot = path.resolve(__dirname) + "/../server";
 global.modulePath = global.appRoot + "/module"
@@ -29,7 +30,6 @@ app.use(bodyParser.json());
 
 const streamHelper = new (require('./module/streamHelper.js')).streamHelper();
 const fileLogger = new (require('./module/fileLogger.js')).fileLogger();
-const torrentHelper = new (require('./module/torrentHelper.js')).torrentHelper();
 
 // hls
 app.get('/hls/:movie', (req, res) => {
@@ -48,17 +48,17 @@ app.get('/pseudo/:movie', (req, res) => {
 
 app.post('/torrent/requestDownload', (req, res) => {
   var type = req.body.type;
-  if (type == 'magent') {
+  if (type == 'magnet') {
     let magnet = req.body.magnet;
-    torrentHelper.requestDownload(magnet);
+    console.log(magnet);
+    torrentManager.requestDownload(magnet);
   }
 
   res.status(200).send('finished');
 });
 
 app.post('/torrent/getTorrentList', (req, res) => {
-  dbHelper.getAllTorret().then(function(list) {
-    console.log('Success : ' + list);
+  mongoDbManager.getAllTorret().then(function(list) {
     res.status(200).json(list);
   }).catch(function(err){
     console.log('Error : ' + err);
