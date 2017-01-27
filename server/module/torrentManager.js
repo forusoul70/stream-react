@@ -89,7 +89,7 @@ torrentManager.prototype.requestDownload = function (torrentId, downloadPath) {
         var status = self.getStatus(torrentId);
         if (status !== undefined) {
           torrent.downloadStatus = JSON.stringify(status);
-          mongoDbManager.updateTorrent(torrentId, torrent).then(function(){            
+          mongoDbManager.updateTorrent(torrentId, torrent).then(function(){
             console.dir(status);
           }).catch(function(err) {
             console.log('Failed to update status : ' + err);
@@ -113,7 +113,7 @@ torrentManager.prototype.requestDownload = function (torrentId, downloadPath) {
         console.log('%s[%d][%b]', file.name, file.length, file.downloaded);
       });
 
-      this.downloadMap[torrentId] = null;
+      delete self.downloadMap[torrentId];
     });
   });
 };

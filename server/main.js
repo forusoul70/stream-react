@@ -6,9 +6,6 @@ import bodyParser from 'body-parser';
 import mongoDbManager from './module/mongoDbManager';
 import torrentManager from './module/torrentManager'
 
-global.appRoot = path.resolve(__dirname) + "/../server";
-global.modulePath = global.appRoot + "/module"
-
 const app = express();
 const port = 3000;
 const devPort = 3001;
@@ -29,7 +26,6 @@ app.use(bodyParser.urlencoded({ extended : true }));
 app.use(bodyParser.json());
 
 const streamHelper = new (require('./module/streamHelper.js')).streamHelper();
-const fileLogger = new (require('./module/fileLogger.js')).fileLogger();
 
 // hls
 app.get('/hls/:movie', (req, res) => {

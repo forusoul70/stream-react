@@ -1,10 +1,9 @@
 var path = require('path');
 var fs = require('fs');
 var events = require("events");
-const RESOURCE_PATH = 'resource/movie/';
+const RESOURCE_PATH = '../resource/movie/';
 const MIME_MP4 = 'video/mp4'
 var handler = new events.EventEmitter();
-var fileLogger = new (require(global.modulePath + '/fileLogger.js')).fileLogger();
 
 // error handler define
 handler.on('badRequest', (res, error) => {
@@ -172,7 +171,7 @@ module.exports.streamHelper = function() {
     // file format 검사
     var movie = req.params.file;
     var folder = _findFolder(movie);
-    var filePath = path.join(global.appRoot, RESOURCE_PATH + folder + '/' + movie);
+    var filePath = path.join(__dirname, RESOURCE_PATH + folder + '/' + movie);
 
     // file 찾기
     _isFileExist(filePath).catch(function(e){
@@ -198,7 +197,7 @@ module.exports.streamHelper = function() {
       // 먼저 파일이 있는 지 체크
       var movie = req.params.movie;
 
-      var filePath = path.join(global.appRoot, RESOURCE_PATH + '/' + movie);
+      var filePath = path.join(__dirname, RESOURCE_PATH + '/' + movie);
       if (_isSupportType(movie) == false) {
         handler.emit('badRequest', res, 'Unsupport mime type');
         return;
