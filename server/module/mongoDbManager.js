@@ -36,7 +36,8 @@ mongoDbManager.prototype.requestConnect = function() {
       magnetURI: String,
       downloaded: Boolean,
       path : String,
-      downloadStatus : String
+      downloadStatus : String,
+      files: [mongoose.Schema.Types.Mixed]
     });
 
     try {
@@ -74,7 +75,14 @@ mongoDbManager.prototype.getTorrent = function(torrentId) {
         failed();
         return;
       }
-      success(model);
+      success({
+        infoHash: model.infoHash,
+        magnetURI: model.magnetURI,
+        downloaded: model.downloaded,
+        path : model.path,
+        downloadStatus : model.downloadStatus,
+        files : model.files
+      });
     });
   });
 }
@@ -101,7 +109,8 @@ mongoDbManager.prototype.getAllTorret = function() {
           magnetURI: model.magnetURI,
           downloaded: model.downloaded,
           path : model.path,
-          downloadStatus : model.downloadStatus
+          downloadStatus : model.downloadStatus,
+          files : model.files
         }
       }));
     });
@@ -131,6 +140,13 @@ mongoDbManager.prototype.updateTorrent= function(id, torrent) {
       ,downloaded: torrent.downloaded
       ,path : torrent.path
       ,downloadStatus : torrent.downloadStatus
+      ,files : torrent.files.map(function(file) {
+        return {
+          name : file.name,
+          path : file.path,
+          length : file.length
+        }
+      })
     };
 
     self.model.findOneAndUpdate({id : id}, torrentRow, {upsert : true}, function(err, doc){

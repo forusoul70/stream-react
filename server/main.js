@@ -38,7 +38,7 @@ app.get('/file/:file', (req, res) => {
 });
 
 // psuedo streaming
-app.get('/pseudo/:movie', (req, res) => {
+app.get('/stream/:movie', (req, res) => {
   streamHelper.responsePseudoMovie(req, res);
 });
 
