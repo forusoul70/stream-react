@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios'
+
 import TorrentInfo from './TorrentInfo'
 
 const IDLE = 0;
@@ -8,6 +9,8 @@ const FINISHED = 2;
 
 const REQUEST_DOWNLOAD_URL = '/torrent/requestDownload';
 const REQUEST_GET_TORRENT_LIST = '/torrent/getTorrentList';
+
+const SOCKET_EVENT_ON_DOWNLOAD = 'onDownload';
 
 export default class DownloadDetail extends React.Component {
     constructor(props) {
@@ -21,13 +24,19 @@ export default class DownloadDetail extends React.Component {
       this.handleChange = this.handleChange.bind(this);
       this.requestDownload = this.requestDownload.bind(this);
       this.getDownloadList = this.getDownloadList.bind(this);
+
+      // init push listener
+      this.socket = io.connect();
+      var self = this;
+      this.socket.on(SOCKET_EVENT_ON_DOWNLOAD, (event) => {
+        self.getDownloadList();
+      });
       this.getDownloadList();
     }
 
     getDownloadList() {
       axios.post(REQUEST_GET_TORRENT_LIST, {})
       .then(res => {
-        console.log(res.data);
         this.setState({
           torrentList : res.data
         });
@@ -37,17 +46,15 @@ export default class DownloadDetail extends React.Component {
     }
 
     requestDownload() {
+      const self = this;
+
       axios.post(REQUEST_DOWNLOAD_URL, {
         type : 'magnet',
         magnet : this.state.magnetUrl
       }).then(res => {
         console.log('download request finished, res is ' + res);
-
-        const self = this;
-        const polling = setInterval(function() {
-          console.log('retry get torrent download list');
-          self.getDownloadList();
-        }, 1000);
+      }).catch(err => {
+        console.log(err);
       })
     }
 

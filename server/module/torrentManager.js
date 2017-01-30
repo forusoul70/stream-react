@@ -47,12 +47,13 @@ var prettyBytes = function(num) {
 */
 var torrentManager = function() {
   this.downloadMap = {};
+  this.listenerMap = {};
 };
 
 /**
 * torrent 다운로드 요청.
 */
-torrentManager.prototype.requestDownload = function (torrentId, downloadPath) {
+torrentManager.prototype.requestDownload = function(torrentId, downloadPath, listener) {
   // validation check
   if (typeof torrentId !== 'string' || torrentId.length == 0) {
     console.log('Invalid torrent id');
@@ -71,6 +72,7 @@ torrentManager.prototype.requestDownload = function (torrentId, downloadPath) {
 
     // insert torrent to dictionary
     self.downloadMap[torrentId] = torrent;
+    self.listenerMap[torrentId] = listener;
 
     // update torrent status to db
     torrent.downloadStatus = STATUS_DOWNLOADING;
@@ -91,6 +93,10 @@ torrentManager.prototype.requestDownload = function (torrentId, downloadPath) {
           torrent.downloadStatus = JSON.stringify(status);
           mongoDbManager.updateTorrent(torrentId, torrent).then(function(){
             console.dir(status);
+            var listener = self.listenerMap[torrentId];
+            if (listener !== undefined) {
+              listener(status);
+            }
           }).catch(function(err) {
             console.log('Failed to update status : ' + err);
           });
@@ -114,6 +120,7 @@ torrentManager.prototype.requestDownload = function (torrentId, downloadPath) {
       });
 
       delete self.downloadMap[torrentId];
+      delete self.listenerMap[torrentId];
     });
   });
 };

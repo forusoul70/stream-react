@@ -5,10 +5,14 @@ import path from 'path';
 import bodyParser from 'body-parser';
 import mongoDbManager from './module/mongoDbManager';
 import torrentManager from './module/torrentManager'
+import socket from 'socket.io';
+var io = null;
 
 const app = express();
 const port = 3000;
 const devPort = 3001;
+
+const SOCKET_EVENT_ON_DOWNLOAD = 'onDownload';
 
 if (process.env.NODE_ENV == 'development') {
     console.log('Server is running on development mode');
@@ -20,6 +24,7 @@ if (process.env.NODE_ENV == 'development') {
         console.log('webpack-dev-server is listening on port', devPort);
     });
 }
+
 app.use('/', express.static(__dirname + '/../public'));
 app.use('/resource/', express.static(__dirname + '/resource'));
 app.use(bodyParser.urlencoded({ extended : true }));
@@ -46,8 +51,12 @@ app.post('/torrent/requestDownload', (req, res) => {
   var type = req.body.type;
   if (type == 'magnet') {
     let magnet = req.body.magnet;
-    console.log(magnet);
-    torrentManager.requestDownload(magnet);
+    var listener = function(event) {
+      if (io  !== null) {
+        io.emit(SOCKET_EVENT_ON_DOWNLOAD, event);
+      }
+    };
+    torrentManager.requestDownload(magnet, null, listener);
   }
 
   res.status(200).send('finished');
@@ -64,4 +73,10 @@ app.post('/torrent/getTorrentList', (req, res) => {
 
 const server = app.listen(port, () => {
     console.log('Express listening on port', port);
+});
+
+// init socket.io
+io = socket(server);
+io.on('connection', (socket) => {
+  console.log('Connected socket');
 });

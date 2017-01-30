@@ -20,6 +20,7 @@
     "mongoose": "^4.7.7",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
+    "socket.io": "^1.7.2",
     "webtorrent": "^0.98.3"
   },
   "devDependencies": {
