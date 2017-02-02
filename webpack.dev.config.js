@@ -2,15 +2,18 @@ var webpack = require('webpack');
 
 module.exports = {
 
-    entry: [
-        './src/index.js',
-        'webpack-dev-server/client?http://0.0.0.0:3001',
-        'webpack/hot/only-dev-server'
-    ],
+    entry: {
+        index : [
+          './src/index.js',
+          'webpack-dev-server/client?http://0.0.0.0:3001',
+          'webpack/hot/only-dev-server'
+        ],
+        torrent: './src/torrent.js',
+    },
 
     output: {
         path: '/',
-        filename: 'bundle.js'
+        filename: '[name]bundle.js'
     },
 
     devServer: {

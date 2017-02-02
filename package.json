@@ -4,7 +4,7 @@
   "description": "video streaming project and react",
   "main": "index.js",
   "scripts": {
-    "clean": "rm -rf build public/bundle.js",
+    "clean": "rm -rf build public/*bundle.js",
     "build": "babel server --out-dir build && ./node_modules/.bin/webpack",
     "start": "NODE_ENV=production node ./build/main.js",
     "development": "NODE_ENV=development node ./build/main.js"
@@ -13,11 +13,12 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.15.3",
-    "babel": "^6.5.2",
     "body-parser": "^1.16.0",
     "express": "^4.14.0",
+    "express-session": "^1.15.0",
     "mongodb": "^2.2.21",
     "mongoose": "^4.7.7",
+    "pbkdf2-password": "^1.2.1",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
     "socket.io": "^1.7.2",
