@@ -161,6 +161,28 @@ mongoDbManager.prototype.updateTorrent= function(id, torrent) {
   });
 };
 
+mongoDbManager.prototype.removeTorrentByInfoHash = function(hash) {
+  console.log(hash);
+  var self = this;
+  return new Promise(function(success, fail) {
+    if (self.isConnected == false) {
+        throw 'Database is not connected';
+    }
+
+    self.model.findOneAndRemove({infoHash : hash}, function(err, doc, result) {
+        if (err) throw err;
+
+        console.log(doc);
+        console.log(result);
+        if (doc) {
+          success(doc);
+        } else {
+          fail();
+        }
+    });
+  });
+};
+
 // Singleton
 mongoDbManager.instance = null;
 mongoDbManager.getInstance = function() {

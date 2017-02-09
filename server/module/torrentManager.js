@@ -87,12 +87,18 @@ torrentManager.prototype.requestDownload = function(torrentId, downloadPath, lis
       console.log('Error occurred : ', err);
     });
 
+    var updateTime = Date.now();
     torrent.on('download', function(bytes) {
+        var now = Date.now();
+        if (now - updateTime < 1000) {
+          return;
+        }
+        updateTime = now;
+
         var status = self.getStatus(torrentId);
         if (status !== undefined) {
           torrent.downloadStatus = JSON.stringify(status);
           mongoDbManager.updateTorrent(torrentId, torrent).then(function(){
-            console.dir(status);
             var listener = self.listenerMap[torrentId];
             if (listener !== undefined) {
               listener(status);

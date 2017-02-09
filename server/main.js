@@ -8,6 +8,7 @@ import bkfd2Password from 'pbkdf2-password'
 import mongoDbManager from './module/mongoDbManager';
 import torrentManager from './module/torrentManager'
 import socket from 'socket.io';
+import fs from 'fs';
 var io = null;
 
 const app = express();
@@ -106,6 +107,33 @@ app.post('/torrent/getTorrentList', (req, res) => {
   }).catch(function(err){
     console.log('Error : ' + err);
     res.status(400).send(err);
+  })
+});
+
+app.post('/torrent/removeTorrent', (req, res) => {
+  var infoHash = req.body.infoHash;
+  if (infoHash === undefined) {
+    console.log(0);
+    return res.status(400).send('Invalid id');
+  }
+
+  mongoDbManager.removeTorrentByInfoHash(infoHash).then(function(torrent) {
+    // db 에서 찾았음.
+    torrent.files.forEach(function(file){
+      var filePath = torrent.path + "/" + file.name;
+      console.log(filePath);
+      fs.unlink(filePath, function(err) {
+        if (err) console.log(err);
+      });
+      res.status(200).send('Success');
+    });
+
+  }, function() {
+    // 찾지 못해서 실패
+    res.status(200).send('Failed to find torrent');
+  }).catch(function(err) {
+    console.log(err);
+    res.status(400).send('error ' + err)
   })
 });
 

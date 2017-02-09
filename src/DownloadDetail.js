@@ -24,6 +24,7 @@ export default class DownloadDetail extends React.Component {
       this.handleChange = this.handleChange.bind(this);
       this.requestDownload = this.requestDownload.bind(this);
       this.getDownloadList = this.getDownloadList.bind(this);
+      this.handleDeleteTorrent = this.handleDeleteTorrent.bind(this);
 
       // init push listener
       this.socket = io.connect();
@@ -65,11 +66,15 @@ export default class DownloadDetail extends React.Component {
       console.log(this.state.magnetUrl);
     }
 
+    handleDeleteTorrent() {      
+      this.getDownloadList();
+    }
+
     render() {
       var empty = (<div>empty</div>);
       var torrentList = (list) => {
         return list.map((torrent, i) => {
-          return (<TorrentInfo torrent={torrent} key={i}/>);
+          return (<TorrentInfo torrent={torrent} key={i} onDeleteTorentListener={this.handleDeleteTorrent}/>);
         });
       }
 
