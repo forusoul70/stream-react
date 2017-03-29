@@ -34,7 +34,7 @@ export default class TorrentInfo extends React.Component {
         return (
           <button
             key={i}
-            onClick={() => this.requestStreaming(file.name)}>
+            onClick={() => this.requestStreaming(file.path)}>
             {file.name}
           </button>);
       });

@@ -37,12 +37,14 @@ var _isSupportType = function(fileName) {
 **/
 
 var _isFileExist = function(filePath) {
-  return new Promise(function(exist) {
+  return new Promise(function(exist, notFound) {
     fs.exists(filePath, function(isExist) {
       if (isExist) { // 존재 할때
         exist();
       } else { // 존재 하지 않을 때
-        throw 'File not exist [' + filePath + ']';
+        // Promoise 에서 catch 를 잡지 못하는데 ㅠㅠ
+        // throw 'File not exist [' + filePath + ']';
+        notFound();
       }
     });
   });
@@ -174,7 +176,7 @@ module.exports.streamHelper = function() {
     var filePath = path.join(__dirname, RESOURCE_PATH + folder + '/' + movie);
 
     // file 찾기
-    _isFileExist(filePath).catch(function(e){
+    _isFileExist(filePath).catch(function(e) {
       res.status(400).send(e);
     }).then(function(){
       switch (path.extname(movie)) {
@@ -186,6 +188,8 @@ module.exports.streamHelper = function() {
           break;
         default:
       }
+    }, function() {
+      res.status(401).send('File not found');
     });
   }
 
@@ -205,6 +209,8 @@ module.exports.streamHelper = function() {
 
       _isFileExist(filePath).then(function() {
         return _makePseudoResponseHeader(filePath, req.get('Range'));
+      }, function() {
+        res.status(401).send('File not found');
       }).then(function(info) {
         // 헤더를 만든다.
         res.header('Content-Type', MIME_MP4);
