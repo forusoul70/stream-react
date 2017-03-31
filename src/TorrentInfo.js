@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios'
 
-const REQUEST_STREAMING_URL = '/stream/';
+const REQUEST_STREAMING_URL = '/stream';
 const REQUEST_REMOVE_TORRENT = '/torrent/removeTorrent/';
 
 export default class TorrentInfo extends React.Component {
@@ -13,8 +13,8 @@ export default class TorrentInfo extends React.Component {
     this.requestDelete = this.requestDelete.bind(this);
   };
 
-  requestStreaming(fileName) {
-    window.open(REQUEST_STREAMING_URL + fileName);
+  requestStreaming(path) {
+    window.open(REQUEST_STREAMING_URL + '?path=' + path);
   }
 
   requestDelete() {

@@ -199,7 +199,7 @@ module.exports.streamHelper = function() {
   this.responsePseudoMovie = function(req, res) {
     try {
       // 먼저 파일이 있는 지 체크
-      var movie = req.params.movie;
+      var movie = req.query.path;
 
       var filePath = path.join(__dirname, RESOURCE_PATH + '/' + movie);
       if (_isSupportType(movie) == false) {

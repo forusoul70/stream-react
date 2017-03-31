@@ -82,7 +82,7 @@ app.get('/file/:file', (req, res) => {
 });
 
 // psuedo streaming
-app.get('/stream/:movie', (req, res) => {
+app.get('/stream', (req, res) => {
   streamHelper.responsePseudoMovie(req, res);
 });
 
